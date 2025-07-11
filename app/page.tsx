@@ -45,16 +45,14 @@ export default function HomePage() {
         clearInterval(interval);
         setCountdown(null);
         setPhase("go");
-        playGo();
         setTimeout(() => {
           setPhase("reading");
-        }, 1000);
+        }, 500);
       }
     }, 1000);
   };
 
   const playBeep = () => new Audio("/beep.mp3").play();
-  const playGo = () => new Audio("/go.mp3").play();
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
@@ -199,6 +197,7 @@ export default function HomePage() {
               alert("🎉 Quiz completed! Great job!");
               setPhase("input");
             }}
+            originalText={text}
           />
         )}
       </div>

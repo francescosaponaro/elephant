@@ -25,12 +25,12 @@ export default function WordDisplay({
   const words = text.split(/\s+/);
   const [index, setIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [startTime] = useState(Date.now());
   const TOTAL_TIME = 120;
   const [timeLeft, setTimeLeft] = useState(TOTAL_TIME);
   const [hasFetched, setHasFetched] = useState(false);
   const [speed, setSpeed] = useState(400); // default: 400ms per word
   const [loading, setLoading] = useState(false);
+  const [startTime, setStartTime] = useState(Date.now());
 
   useEffect(() => {
     const elapsedMs = Date.now() - startTime;
@@ -95,7 +95,7 @@ export default function WordDisplay({
           <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500 border-solid" />
         </div>
       )}
-      <Card className="backdrop-blur-sm bg-white/90 border-0 shadow-2xl shadow-blue-500/10 p-8">
+      <Card className="backdrop-blur-sm bg-white/90 border-0 shadow-2xl shadow-blue-500/10 p-8 mb-8">
         {/* Progress and Timer */}
         <div className="mb-8 space-y-4">
           <div className="flex justify-between items-center text-sm text-gray-600">
@@ -149,7 +149,7 @@ export default function WordDisplay({
         </div>
 
         {/* Controls */}
-        <div className="flex justify-center">
+        <div className="flex justify-center space-x-4">
           <Button
             onClick={() => setIsPlaying((p) => !p)}
             className="h-14 px-8 text-lg font-semibold bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
@@ -166,6 +166,21 @@ export default function WordDisplay({
               </>
             )}
           </Button>
+
+          <Button
+            onClick={() => {
+              setIndex(0);
+              setIsPlaying(false); // stop playback on restart
+              setHasFetched(false);
+              setLoading(false);
+              setTimeLeft(TOTAL_TIME); // reset timer
+              setStartTime(Date.now()); // reset internal time reference
+            }}
+            variant="outline"
+            className="h-14 px-6 text-lg font-semibold border-gray-300 hover:border-gray-500 transition"
+          >
+            Restart
+          </Button>
         </div>
       </Card>
 
@@ -181,7 +196,10 @@ export default function WordDisplay({
               min={100}
               max={1000}
               step={50}
-              onValueChange={([val]) => setSpeed(val)}
+              onValueChange={([val]) => {
+                const inverted = 1100 - val; // Invert slider direction (100 → 1000, 1000 → 100)
+                setSpeed(inverted);
+              }}
               className="[&>span:first-child]:h-3 [&>span:first-child]:bg-gradient-to-r [&>span:first-child]:from-gray-200 [&>span:first-child]:to-gray-300 [&>span:first-child]:rounded-full [&_[role=slider]]:bg-gradient-to-r [&_[role=slider]]:from-blue-500 [&_[role=slider]]:to-purple-600 [&_[role=slider]]:w-6 [&_[role=slider]]:h-6 [&_[role=slider]]:border-0 [&_[role=slider]]:shadow-lg [&>span:first-child_span]:bg-gradient-to-r [&>span:first-child_span]:from-blue-500 [&>span:first-child_span]:to-purple-500 [&_[role=slider]:focus-visible]:ring-0 [&_[role=slider]:focus-visible]:ring-offset-0 [&_[role=slider]:focus-visible]:scale-110 [&_[role=slider]:focus-visible]:transition-transform [&_[role=slider]]:hover:scale-105 [&_[role=slider]]:transition-all [&_[role=slider]]:duration-200"
             />
             <div className="text-sm text-gray-500 mt-3 font-medium">
