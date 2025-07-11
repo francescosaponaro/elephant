@@ -9,8 +9,8 @@ const openai = new OpenAI({
 export async function POST(req: Request) {
   const { text } = await req.json();
 
-  const promptSummary = `Summarize the following text in 3-4 sentences:\n\n${text}`;
-  const promptQuestions = `Create 3 flashcard questions from the following text. Respond in JSON format like this:
+  const promptSummary = `Summarize the following text in 3-4 sentences in the same language:\n\n${text}`;
+  const promptQuestions = `Create 3 flashcard questions from the following text in the same language as the text. Respond in JSON format like this:
 [
   { "question": "Is the sky blue?", "type": "yesno" },
   { "question": "What is the main idea?", "type": "text" }

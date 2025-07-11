@@ -142,7 +142,7 @@ export default function HomePage() {
         {/* Go Phase */}
         {phase === "go" && (
           <div className="flex items-center justify-center">
-            <div className="text-8xl font-black bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent animate-bounce drop-shadow-2xl">
+            <div className="text-8xl font-black bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent animate-bounce drop-shadow-2xl text-center">
               GO! 🎯
             </div>
           </div>

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Pause, Play, Clock } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
 
 type Flashcard = {
   question: string;
@@ -28,6 +29,8 @@ export default function WordDisplay({
   const TOTAL_TIME = 120;
   const [timeLeft, setTimeLeft] = useState(TOTAL_TIME);
   const [hasFetched, setHasFetched] = useState(false);
+  const [speed, setSpeed] = useState(400); // default: 400ms per word
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const elapsedMs = Date.now() - startTime;
@@ -42,6 +45,7 @@ export default function WordDisplay({
     ) {
       setIsPlaying(false);
       setHasFetched(true);
+      setLoading(true); // Start loader
 
       fetch("/api/generate", {
         method: "POST",
@@ -53,7 +57,8 @@ export default function WordDisplay({
           setRecap(data.summary);
           setQuiz(data.questions);
           onComplete();
-        });
+        })
+        .finally(() => setLoading(false)); // Stop loader;
     }
 
     // Timer interval
@@ -69,18 +74,27 @@ export default function WordDisplay({
   useEffect(() => {
     if (!isPlaying || index >= words.length || timeLeft <= 0) return;
 
+    const currentWord = words[index] || "";
+    const adjustedSpeed =
+      currentWord.length < 4 ? Math.max(100, speed * 0.5) : speed;
+
     const timer = setTimeout(() => {
       setIndex((i) => i + 1);
-    }, 400);
+    }, adjustedSpeed);
 
     return () => clearTimeout(timer);
-  }, [isPlaying, index, timeLeft]);
+  }, [isPlaying, index, timeLeft, speed]);
 
   const progress = (index / words.length) * 100;
   const timeProgress = ((TOTAL_TIME - timeLeft) / TOTAL_TIME) * 100;
 
   return (
     <div className="animate-in fade-in-0 duration-500">
+      {loading && (
+        <div className="fixed inset-0 bg-white/80 flex items-center justify-center z-50">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500 border-solid" />
+        </div>
+      )}
       <Card className="backdrop-blur-sm bg-white/90 border-0 shadow-2xl shadow-blue-500/10 p-8">
         {/* Progress and Timer */}
         <div className="mb-8 space-y-4">
@@ -126,7 +140,7 @@ export default function WordDisplay({
           <div className="min-h-[120px] flex items-center justify-center">
             <div
               key={index}
-              className="text-6xl md:text-7xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent animate-in fade-in-0 zoom-in-50 duration-200"
+              className="text-4xl md:text-7xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent animate-in fade-in-0 zoom-in-50 duration-200"
               style={{ fontFamily: "FastSans", wordBreak: "break-word" }}
             >
               {words[index] || ""}
@@ -152,6 +166,28 @@ export default function WordDisplay({
               </>
             )}
           </Button>
+        </div>
+      </Card>
+
+      {/* Speed Slider */}
+      <Card className="backdrop-blur-sm bg-white/90 border-0 shadow-2xl shadow-blue-500/10 p-6">
+        <div className="text-center space-y-4">
+          <div className="text-lg font-semibold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+            Playback Speed
+          </div>
+          <div className="px-4 md:px-12">
+            <Slider
+              defaultValue={[speed]}
+              min={100}
+              max={1000}
+              step={50}
+              onValueChange={([val]) => setSpeed(val)}
+              className="[&>span:first-child]:h-3 [&>span:first-child]:bg-gradient-to-r [&>span:first-child]:from-gray-200 [&>span:first-child]:to-gray-300 [&>span:first-child]:rounded-full [&_[role=slider]]:bg-gradient-to-r [&_[role=slider]]:from-blue-500 [&_[role=slider]]:to-purple-600 [&_[role=slider]]:w-6 [&_[role=slider]]:h-6 [&_[role=slider]]:border-0 [&_[role=slider]]:shadow-lg [&>span:first-child_span]:bg-gradient-to-r [&>span:first-child_span]:from-blue-500 [&>span:first-child_span]:to-purple-500 [&_[role=slider]:focus-visible]:ring-0 [&_[role=slider]:focus-visible]:ring-offset-0 [&_[role=slider]:focus-visible]:scale-110 [&_[role=slider]:focus-visible]:transition-transform [&_[role=slider]]:hover:scale-105 [&_[role=slider]]:transition-all [&_[role=slider]]:duration-200"
+            />
+            <div className="text-sm text-gray-500 mt-3 font-medium">
+              {speed} ms per word
+            </div>
+          </div>
         </div>
       </Card>
     </div>
